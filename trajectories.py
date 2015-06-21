@@ -1038,7 +1038,7 @@ def plot_transit_timeline(intervals,transit,tot_interv, ved_trans,npo,ndls,write
     # ylabes=ved_trans.keys()#['(u,v)','(u,w)','(u,z)']#,'(v,w)','(z,w)']
     # print bott
     plt.yticks(botti,ylabes)
-    plt.title('Activity Timeline')
+    plt.title('Activity Timeline Diagram',{'size': '20'})
     plt.ylim(0,bot+.5)
     xl=[]
     yl=[]
@@ -1660,7 +1660,8 @@ def create_synthetic3lgB(k,n,m,pp,timetoadd=0):
     # pp=[0.21,.31,.21,.31,.4]
     # G, list_of_Graphs_final, Gagr, edgeList,nmap,mapping =s3l.synthetic_multi_level(k,n,p=pp,No_isolates=True)
     G, list_of_Graphs_final, Gagr, edgeList,nmap,mapping =s3l.synthetic_multi_bipartite(k,n,m,p=pp)
-    s3l.plot_graph_k_nm(k,n,m,G,list_of_Graphs_final, Gagr,colors_grey='bipartite', nodesize=50,withlabels=True,edgelist=edgeList,layout=True,b_alpha=0.5)
+    pos,fig1=s3l.plot_graph_k_nm(k,n,m,G,list_of_Graphs_final, Gagr,1,colors_grey='bipartite', nodesize=50,withlabels=True,edgelist=edgeList,layout=True,b_alpha=0.5)
+    # pos,fig2=s3l.plot_graph_k_nm(k,n,m,G,list_of_Graphs_final, Gagr,2,colors_grey='bipartite', nodesize=50,withlabels=True,edgelist=edgeList,layout=True,b_alpha=0.5)
     dic_of_edges,dict_of_edges_time=s3l.make_dict_of_edge_timesB(k,nmap,mapping,list_of_Graphs_final)
     Gg=nx.MultiGraph()
     # print dic_of_edges
@@ -1686,15 +1687,15 @@ def create_synthetic3lgB(k,n,m,pp,timetoadd=0):
     # print ndls
     # ndls=Gg.nodes()
     # print aaaaa
-    return Gg,ndls,timetoadd
+    return Gg,ndls,timetoadd,fig1
 def create_synthetic3lg(k,n,pp,timetoadd=0):    
     import syntheticThreeLayerGraph_time as s3l
     # k=5
-    # n=10
+    # n=10 
     # pp=[0.21,.31,.21,.31,.4]
     G, list_of_Graphs_final, Gagr, edgeList,nmap,mapping =s3l.synthetic_multi_level(k,n,p=pp,No_isolates=True)
     # print edgeList
-    s3l.plot_graph_k_n(k,n,G,list_of_Graphs_final, Gagr,nodesize=50,withlabels=False,edgelist=edgeList,layout=True,b_alpha=1)
+    pos,figi=s3l.plot_graph_k_n(k,n,G,list_of_Graphs_final, Gagr,nodesize=50,withlabels=False,edgelist=edgeList,layout=True,b_alpha=1)
     # G, list_of_Graphs_final, Gagr, edgeList,nmap,mapping =s3l.synthetic_multi_bipartite(k,n,m,p=pp)
     dic_of_edges,dict_of_edges_time=s3l.make_dict_of_edge_times(k,nmap,mapping,list_of_Graphs_final)
     # print dic_of_edges
@@ -1719,10 +1720,11 @@ def create_synthetic3lg(k,n,pp,timetoadd=0):
             Gg.add_edge(str(i[0]),str(i[1]),date_start=jj[0],date_end=jj[1])
 
     ndls=Gg.nodes()
-    return Gg,ndls,timetoadd
+    return Gg,ndls,timetoadd,figi
 
-def main_work(G,ndll,timetoadd,davisw=False):
+def main_work(G,ndll,timetoadd,figi,davisw=False):
     if isinstance(ndll[0],list):
+        fig_u=1
         for ndls in ndll:
             # print ndls,'aaaaaaaaaaaaaaaa'
             intervals,tot_interval=create_interv(G,nodelist=ndls,time_to_add=timetoadd)
@@ -1798,8 +1800,13 @@ def main_work(G,ndll,timetoadd,davisw=False):
             outfile_names=[]
             outfile_namestr=[]
             counter=0
-            fig1=plt.figure(num=1,figsize=(12,12))
-            fig=plt.figure(num=2,figsize=(14,12))
+            # fig1=plt.figure(num=1,figsize=(12,12))
+            # fig1=figi
+            if fig_u!=1:
+                # fig=plt.figure(figsize=(10,10))
+                fig1 =plt.figure(num=fig_u,figsize=(14,16))
+            fig=plt.figure(num=3,figsize=(24,12))
+            # ax.set_title('Diagrams of vertex transitions')
             for u_node in intervals:
                 # u_node='u'
                 # print u_node,'dflskdjalskdjflkasjdflkasjdfljasldfjalsdkjflaksjdflaksjdflkajsdflkjasldfkj'
@@ -1915,9 +1922,32 @@ def main_work(G,ndll,timetoadd,davisw=False):
             filf='Sub_trans.png' #%u_node
             outfile_name = os.path.join('%s' % filedir,filf)
             # plt.savefig(outfile_name, bbox_inches='tight')
-            fig=plt.figure(num=1)
+            if fig_u!=1:
+                # fig=plt.figure(figsize=(10,10))
+                fig =plt.figure(num=fig_u)
+            else:
+                fig=plt.figure(num=fig_u)
+                # fig=figi[fig_u]
+                
+                fig.add_subplot(122)#,figsize=(12,12))
+
+
+            # fig=plt.figure(num=fig_u)
+            # # fig=figi[fig_u]
+            # fig_u+=1
+            # fig.add_subplot(122)#,figsize=(12,12))
+
             bot_ti,outFig_transit=plot_transit_timeline(intervals,transit,tot_interval,ved_trans,npo,ndls,write_to_file=False)
-            plt.show()
+            # plt.show()
+            if fig_u!=1:
+                print 
+                print 'Statistics of trajectories of second mode vertices'
+                print 
+            else:
+                print 
+                print 'Statistics of trajectories of first mode vertices'
+                print 
+                fig_u+=1
 
             
             # display(Image(filename=outFig))
@@ -2033,8 +2063,11 @@ def main_work(G,ndll,timetoadd,davisw=False):
         outfile_names=[]
         outfile_namestr=[]
         counter=0
-        fig1=plt.figure(num=1,figsize=(12,12))
-        fig=plt.figure(num=2,figsize=(12,12))
+        # fig1=plt.figure(num=1,figsize=(12,12))
+        fig=plt.figure(num=2,figsize=(24,12))
+        # plt.title('Diagrams of vertex transitions')
+        # fig.set_title('Diagrams of vertex transitions')
+
         for u_node in intervals:
             # u_node='u'
             # print u_node,'dflskdjalskdjflkasjdflkasjdfljasldfjalsdkjflaksjdflaksjdflkajsdflkjasldfkj'
@@ -2151,9 +2184,13 @@ def main_work(G,ndll,timetoadd,davisw=False):
         outfile_name = os.path.join('%s' % filedir,filf)
         # plt.savefig(outfile_name, bbox_inches='tight')
         fig=plt.figure(num=1)
+        fig.add_subplot(122)
+        # fig=plt.figure(num=1)
         bot_ti,outFig_transit=plot_transit_timeline(intervals,transit,tot_interval,ved_trans,npo,ndls,write_to_file=False)
         plt.show()
-
+        print 
+        print 'Statistics of trajectories'
+        print 
         
         # display(Image(filename=outFig))
         filedir='S_out_traject'
